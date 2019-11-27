@@ -1,117 +1,37 @@
-'use strict'
+const CustomException = use('App/Exceptions/CustomException')
+const Message = use('App/Exceptions/const')
+const Service = use('App/Services/BaseService')
+class BaseService {
 
-/** @typedef {import('@adonisjs/framework/src/Request')} Request */
-/** @typedef {import('@adonisjs/framework/src/Response')} Response */
-/** @typedef {import('@adonisjs/framework/src/View')} View */
-
-/**
- * Resourceful controller for interacting with bases
- */
-class BaseController {
-
-  constructor( Model, message){
-    this.Model = Model
-    this.message = message
+  constructor(Service, name){
+    this.message = Message(name)
+    this.Service = new Service(Model, name)
   } 
 
-  /**
-   * Show a list of all bases.
-   * GET bases
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async index ({ request, response, view }) {    
-    try{
-      const resp = await this.Model.all()
-      if(!resp){
-          return response.status(404).json(this.message.NOT_FOUND)
-      }
-      return response.status(200).json(resp)
-    } catch(error){
-        console.error(error)
-        return response.status(500).json(this.message.SERVER_ERROR_GET, error)
-    }
+  async index () {
+      const results = await this.Service.index()
+      return results
   }
 
-  /**
-   * Create/save a new base.
-   * POST bases
-   *
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
-  async store ({ request, response }) {
-    try{
-      const resp = await this.Model.create(request.post())
-      return response.status(201).json(resp)
-    } catch(error){
-        console.error(error)
-        return response.status(500).json(this.message.SERVER_ERROR_CREATE, error)
-    }
+  async store (data) {
+      const result = await this.Service.store(data)
+      return result
   }
 
-  /**
-   * Display a single base.
-   * GET bases/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
-  async show ({ params, request, response }) {
-    try{
-      const resp = await this.Modal.find(params.id)
-      if(!resp){
-          return response.status(404).json(this.message.NOT_FOUND)
-      }
-      return response.status(200).json(resp)
-    } catch(error){
-        console.error(error)
-        return response.status(500).json(this.message.SERVER_ERROR_GET)
-    }
+  async show (where) {
+      const result = await this.Service.show(where)
+      return result
   }
 
-  /**
-   * Update base details.
-   * PUT or PATCH bases/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
-  async update ({ params, request, response }) {
-    try{
-      const data = await this.Model.find(params.id)
-      data.merge(request.post())
-      await data.save()
-      return response.status(201).json(data)
-    } catch(error){
-        console.error(error)
-        return response.status(500).json(this.message.SERVER_ERROR_UPDATE)
-    }
+  async update ({id, ...data}) {
+      const result = await this.Service.update(id, data)
+      return result
   }
 
-  /**
-   * Delete a base with id.
-   * DELETE bases/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
-  async destroy ({ params, request, response }) {
-    try{
-      const data = await this.Model.find(params.id)
-      await data.delete()
-      return response.status(204).json()
-    } catch(error){
-        console.error(error)
-        return response.status(500).json(this.message.SERVER_ERROR_DELETE)
-    }
+  async destroy (id) {
+      const result = await this.Service.destroy(id)
+      return result
   }
 }
 
-module.exports = BaseController
+module.exports = BaseService
